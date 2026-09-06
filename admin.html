@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organizer login — TECHNOVA'26</title>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#090C16; --surface:#141A33; --line:#262C4D; --text:#EDEFF9; --muted:#9BA2C7; --cyan:#43E8D8; --green:#43E8D8; }
+  *{box-sizing:border-box;}
+  body{font-family:"Inter",sans-serif; background:var(--bg); color:var(--text); margin:0; padding:2.5rem 2rem;}
+  h1{font-family:"Chakra Petch",sans-serif; font-size:1.4rem; margin:0 0 1.4rem;}
+  .bar{display:flex; gap:.7rem; margin-bottom:1.6rem; flex-wrap:wrap; align-items:center;}
+  input[type="password"]{padding:.65rem .9rem; border:1px solid var(--line); border-radius:8px; font-size:.9rem; min-width:240px; background:var(--surface); color:var(--text);}
+  button, a.btn{padding:.65rem 1.1rem; border-radius:8px; border:1px solid var(--line); background:var(--surface); cursor:pointer; font-size:.85rem; text-decoration:none; color:var(--text); font-family:inherit;}
+  button.primary{background:var(--cyan); color:#081018; border-color:var(--cyan); font-weight:600;}
+  table{width:100%; border-collapse:collapse; background:var(--surface); border-radius:12px; overflow:hidden; font-size:.85rem;}
+  th, td{padding:.75rem .9rem; text-align:left; border-bottom:1px solid var(--line);}
+  th{background:#1B2140; font-weight:600;}
+  .muted{color:var(--muted); font-size:.85rem;}
+  .pill{padding:.2rem .55rem; border-radius:999px; font-size:.72rem; background:#1B2140; color:var(--muted);}
+  .pill.in{background:rgba(67,232,216,.15); color:var(--cyan);}
+</style>
+</head>
+<body>
+  <h1>TECHNOVA'26 — Registrations</h1>
+  <div class="bar">
+    <input type="password" id="adminKey" placeholder="Admin key">
+    <button class="primary" id="loadBtn">Load</button>
+    <a class="btn" id="exportLink" href="#">Export CSV</a>
+    <span class="muted" id="count"></span>
+  </div>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Name</th><th>College</th><th>Events</th><th>Fee</th><th>Checked in</th><th>Registered</th></tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+<script>
+  const $ = (s) => document.querySelector(s);
+  $("#loadBtn").addEventListener("click", load);
+
+  async function load() {
+    const key = $("#adminKey").value.trim();
+    if (!key) return;
+    $("#exportLink").href = `/api/admin-export?key=${encodeURIComponent(key)}`;
+    const res = await fetch(`/api/admin-list?key=${encodeURIComponent(key)}`);
+    if (!res.ok) { alert("Invalid admin key."); return; }
+    const rows = await res.json();
+    $("#count").textContent = `${rows.length} registration(s)`;
+    $("#rows").innerHTML = rows.map((r) => `
+      <tr>
+        <td>${r.id}</td>
+        <td>${r.fullName}<br><span class="muted">${r.email}</span></td>
+        <td>${r.college}</td>
+        <td>${r.events.join(", ")}</td>
+        <td>₹${r.fee}</td>
+        <td><span class="pill ${r.checkedIn ? "in" : ""}">${r.checkedIn ? "Checked in" : "Not yet"}</span></td>
+        <td>${new Date(r.createdAt).toLocaleString()}</td>
+      </tr>`).join("");
+  }
+</script>
+</body>
+</html>
