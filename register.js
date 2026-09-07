@@ -58,4 +58,4 @@ exports.handler = async (event) => {
       error: err.message
     })
   };
-}
+}};
