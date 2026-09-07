@@ -50,8 +50,12 @@ exports.handler = async (event) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ registrationId: id, qrCode }),
     };
-  } catch (err) {
-    console.error(err);
-    return { statusCode: 500, body: JSON.stringify({ error: "Something went wrong. Please try again." }) };
-  }
-};
+  }catch (err) {
+  console.error("REGISTER ERROR:", err);
+  return {
+    statusCode: 500,
+    body: JSON.stringify({
+      error: err.message
+    })
+  };
+}
